@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>اختار أنت يا لون</title>
+<style>
+  :root{
+    --red: #ff3b3b;
+    --blue: #3b82ff;
+  }
+  *{
+    box-sizing: border-box;
+    margin:0;
+    padding:0;
+  }
+  html, body{
+    height:100%;
+    width:100%;
+    overflow-x:hidden;
+    background:#000;
+    font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  }
+
+  /* ===================== طبقات الخلفية ===================== */
+
+  .bg-base{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(255,59,59,0.12), transparent 55%),
+      radial-gradient(ellipse at 80% 30%, rgba(59,130,255,0.14), transparent 55%),
+      radial-gradient(ellipse at 50% 90%, rgba(120,0,255,0.10), transparent 60%),
+      #000;
+  }
+
+  /* نجوم متلألئة */
+  .stars{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+  }
+  .star{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:#fff;
+    border-radius:50%;
+    animation: twinkle linear infinite;
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity:0.15; transform:scale(1); }
+    50%{ opacity:1; transform:scale(1.6); }
+  }
+
+  /* البلوبات المموجة (Morphing Blobs) */
+  .blob-layer{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    overflow:hidden;
+    filter: blur(4px);
+    pointer-events:none;
+  }
+  .blob{
+    position:absolute;
+    opacity:0.55;
+    mix-blend-mode: screen;
+    filter: blur(35px);
+    animation: morph 14s ease-in-out infinite, drift 20s ease-in-out infinite;
+  }
+  .blob1{
+    width:45vmax; height:45vmax;
+    top:-15%; left:-10%;
+    background: radial-gradient(circle at 30% 30%, var(--red), transparent 70%);
+    animation-duration: 16s, 24s;
+  }
+  .blob2{
+    width:50vmax; height:50vmax;
+    bottom:-20%; right:-15%;
+    background: radial-gradient(circle at 60% 40%, var(--blue), transparent 70%);
+    animation-duration: 20s, 28s;
+    animation-delay: -4s, -6s;
+  }
+  .blob3{
+    width:35vmax; height:35vmax;
+    top:35%; left:35%;
+    background: radial-gradient(circle at 50% 50%, #7a1bff, transparent 70%);
+    animation-duration: 18s, 22s;
+    animation-delay: -8s, -2s;
+    opacity:0.35;
+  }
+  @keyframes morph{
+    0%{ border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    25%{ border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    50%{ border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+    75%{ border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; }
+    100%{ border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  }
+  @keyframes drift{
+    0%, 100%{ transform: translate(0,0) rotate(0deg); }
+    50%{ transform: translate(4%, 3%) rotate(20deg); }
+  }
+
+  /* اشكال هندسية عائمة */
+  .shapes-layer{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .shape{
+    position:absolute;
+    opacity:0.5;
+    animation: floaty ease-in-out infinite, spin linear infinite;
+  }
+  @keyframes floaty{
+    0%, 100%{ transform: translateY(0); }
+    50%{ transform: translateY(-40px); }
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+  .shape-ring{
+    border:2px solid rgba(255,59,59,0.5);
+    border-radius:50%;
+  }
+  .shape-square{
+    border:2px solid rgba(59,130,255,0.5);
+    border-radius: 6px;
+  }
+  .shape-triangle{
+    width:0; height:0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 34px solid rgba(255,255,255,0.25);
+  }
+  .shape-plus{
+    color: rgba(255,255,255,0.35);
+    font-size: 22px;
+    font-weight:bold;
+  }
+
+  /* الموجات السفلية */
+  .wave-layer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:200%;
+    height:38vh;
+    z-index:1;
+    opacity:0.3;
+    pointer-events:none;
+  }
+  .wave1{ animation: wave-move 12s linear infinite; }
+  .wave2{ animation: wave-move 18s linear infinite reverse; opacity:0.18; }
+  .wave3{ animation: wave-move 26s linear infinite; opacity:0.12; height:30vh; }
+
+  @keyframes wave-move{
+    0%{ transform: translateX(0); }
+    100%{ transform: translateX(-50%); }
+  }
+
+  /* كانفاس البارتكلز التفاعلية */
+  #bg-canvas{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:2;
+    display:block;
+    pointer-events:none;
+  }
+
+  /* ===================== المحتوى ===================== */
+
+  .container{
+    position:relative;
+    z-index:3;
+    min-height:100vh;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 16px;
+    text-align:center;
+  }
+
+  h1{
+    color:#fff;
+    font-size: clamp(24px, 6vw, 42px);
+    text-shadow: 0 0 20px rgba(255,255,255,0.35), 0 0 40px rgba(255,255,255,0.15);
+    margin-bottom: 36px;
+    letter-spacing: 1px;
+    animation: fadeDown 1s ease, glowPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes fadeDown{
+    from{ opacity:0; transform: translateY(-20px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  @keyframes glowPulse{
+    0%, 100%{ text-shadow: 0 0 20px rgba(255,255,255,0.35), 0 0 40px rgba(255,255,255,0.15); }
+    50%{ text-shadow: 0 0 30px rgba(255,255,255,0.6), 0 0 60px rgba(255,255,255,0.3); }
+  }
+
+  .buttons{
+    display:flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    justify-content:center;
+    animation: fadeUp 1s ease;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(20px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .color-btn{
+    border:none;
+    outline:none;
+    cursor:pointer;
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight:bold;
+    padding: 16px 40px;
+    border-radius: 50px;
+    color:#fff;
+    min-width: 130px;
+    transition: transform .2s ease, box-shadow .2s ease;
+    position:relative;
+  }
+  .color-btn:active{ transform: scale(0.95); }
+
+  .btn-red{
+    background: linear-gradient(135deg, var(--red), #a30000);
+    box-shadow: 0 0 25px rgba(255,59,59,0.6);
+    animation: pulseRed 2.4s ease-in-out infinite;
+  }
+  .btn-red:hover{ box-shadow: 0 0 40px rgba(255,59,59,0.9); }
+
+  .btn-blue{
+    background: linear-gradient(135deg, var(--blue), #0033a3);
+    box-shadow: 0 0 25px rgba(59,130,255,0.6);
+    animation: pulseBlue 2.4s ease-in-out infinite;
+    animation-delay: 1.2s;
+  }
+  .btn-blue:hover{ box-shadow: 0 0 40px rgba(59,130,255,0.9); }
+
+  @keyframes pulseRed{
+    0%, 100%{ box-shadow: 0 0 20px rgba(255,59,59,0.5); }
+    50%{ box-shadow: 0 0 38px rgba(255,59,59,0.95); }
+  }
+  @keyframes pulseBlue{
+    0%, 100%{ box-shadow: 0 0 20px rgba(59,130,255,0.5); }
+    50%{ box-shadow: 0 0 38px rgba(59,130,255,0.95); }
+  }
+
+  .result-area{
+    margin-top: 30px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    animation: fadeIn .8s ease;
+    width:100%;
+    max-width: 480px;
+  }
+  .result-area.show{
+    display:flex;
+  }
+
+  @keyframes fadeIn{
+    from{ opacity:0; transform: scale(0.9); }
+    to{ opacity:1; transform: scale(1); }
+  }
+
+  /* الصورة بدون اطار او خلفية او ظل حتى تندمج مع الخلفية (PNG شفاف) */
+  .result-area img{
+    width:100%;
+    max-width: 420px;
+    display:block;
+    filter: drop-shadow(0 0 25px rgba(255,255,255,0.25));
+    animation: floaty 4s ease-in-out infinite;
+  }
+
+  /* ====== هنا مكان النص الذي سيضاف تحت الصورة ====== */
+  /* ابحث عن id="caption-red" أو id="caption-blue" لكتابة النص */
+  .caption{
+    margin-top: 14px;
+    color:#eee;
+    font-size: clamp(15px, 3.5vw, 19px);
+    line-height:1.7;
+    padding: 0 10px;
+  }
+
+  .back-btn{
+    margin-top: 26px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color:#ccc;
+    padding: 8px 22px;
+    border-radius: 30px;
+    cursor:pointer;
+    font-size:14px;
+    transition: background .2s ease;
+  }
+  .back-btn:hover{
+    background: rgba(255,255,255,0.1);
+  }
+
+  @media (max-width: 480px){
+    .buttons{ gap: 14px; }
+    .color-btn{ padding: 14px 30px; min-width: 110px; }
+    .blob{ filter: blur(22px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- خلفية متدرجة اساسية -->
+<div class="bg-base"></div>
+
+<!-- نجوم متلألئة (تُنشأ بالجافاسكربت) -->
+<div class="stars" id="stars"></div>
+
+<!-- بلوبات مموجة -->
+<div class="blob-layer">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<!-- اشكال هندسية عائمة (تُنشأ بالجافاسكربت) -->
+<div class="shapes-layer" id="shapes"></div>
+
+<!-- موجات SVG -->
+<svg class="wave-layer wave1" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#3b82ff" fill-opacity="1" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+</svg>
+<svg class="wave-layer wave2" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#ff3b3b" fill-opacity="1" d="M0,160L48,181.3C96,203,192,245,288,240C384,235,480,181,576,170.7C672,160,768,192,864,208C960,224,1056,224,1152,202.7C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+</svg>
+<svg class="wave-layer wave3" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#7a1bff" fill-opacity="1" d="M0,224L60,213.3C120,203,240,181,360,181.3C480,181,600,203,720,224C840,245,960,267,1080,256C1200,245,1320,203,1380,181.3L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+</svg>
+
+<!-- كانفاس البارتكلز -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="container">
+  <h1 id="main-title">اختار أنت يا لون</h1>
+
+  <div class="buttons" id="buttons-row">
+    <!-- الزر الايمن: احمر -->
+    <button class="color-btn btn-red" onclick="showColor('red')">أحمر</button>
+    <!-- الزر الايسر: ازرق -->
+    <button class="color-btn btn-blue" onclick="showColor('blue')">أزرق</button>
+  </div>
+
+  <!-- نتيجة الاحمر -->
+  <div class="result-area" id="result-red">
+    <img src="images/1.png" alt="صورة اللون الأحمر">
+    <!-- ====== ضع النص الخاص باللون الأحمر هنا داخل هذا العنصر ====== -->
+    <p class="caption" id="caption-red"></p>
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+  </div>
+
+  <!-- نتيجة الازرق -->
+  <div class="result-area" id="result-blue">
+    <img src="images/2.png" alt="صورة اللون الأزرق">
+    <!-- ====== ضع النص الخاص باللون الأزرق هنا داخل هذا العنصر ====== -->
+    <p class="caption" id="caption-blue"></p>
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+  </div>
+</div>
+
+<script>
+  function showColor(color){
+    document.getElementById('buttons-row').style.display = 'none';
+    document.getElementById('main-title').style.display = 'none';
+    document.getElementById('result-' + color).classList.add('show');
+  }
+  function goBack(){
+    document.getElementById('result-red').classList.remove('show');
+    document.getElementById('result-blue').classList.remove('show');
+    document.getElementById('buttons-row').style.display = 'flex';
+    document.getElementById('main-title').style.display = 'block';
+  }
+
+  /* ==================== توليد النجوم المتلألئة ==================== */
+  (function createStars(){
+    const starsContainer = document.getElementById('stars');
+    const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 12000));
+    for(let i=0;i<count;i++){
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random()*100 + '%';
+      s.style.top = Math.random()*100 + '%';
+      const size = Math.random()*2 + 1;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.animationDuration = (Math.random()*3 + 2) + 's';
+      s.style.animationDelay = (Math.random()*4) + 's';
+      starsContainer.appendChild(s);
+    }
+  })();
+
+  /* ==================== توليد الاشكال الهندسية العائمة ==================== */
+  (function createShapes(){
+    const shapesContainer = document.getElementById('shapes');
+    const shapeTypes = ['ring','square','triangle','plus'];
+    const shapeCount = window.innerWidth < 500 ? 10 : 18;
+
+    for(let i=0;i<shapeCount;i++){
+      const type = shapeTypes[Math.floor(Math.random()*shapeTypes.length)];
+      const el = document.createElement('div');
+      el.classList.add('shape');
+
+      const left = Math.random()*100;
+      const top = Math.random()*100;
+      const floatDur = (Math.random()*6 + 6).toFixed(1);
+      const spinDur = (Math.random()*20 + 10).toFixed(1);
+      const delay = (Math.random()*6).toFixed(1);
+
+      el.style.left = left + '%';
+      el.style.top = top + '%';
+      el.style.animationDuration = floatDur + 's, ' + spinDur + 's';
+      el.style.animationDelay = delay + 's, 0s';
+
+      if(type === 'ring'){
+        el.classList.add('shape-ring');
+        const size = Math.random()*30 + 20;
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+      } else if(type === 'square'){
+        el.classList.add('shape-square');
+        const size = Math.random()*22 + 14;
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+      } else if(type === 'triangle'){
+        el.classList.add('shape-triangle');
+      } else {
+        el.classList.add('shape-plus');
+        el.textContent = '+';
+      }
+
+      shapesContainer.appendChild(el);
+    }
+  })();
+
+  /* ==================== بارتكلز الكانفاس المتحركة والمتصلة ==================== */
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles;
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function initParticles(){
+    const count = Math.min(100, Math.floor((W*H)/13000));
+    particles = [];
+    for(let i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: Math.random()*2.2 + 0.6,
+        dx: (Math.random()-0.5)*0.5,
+        dy: (Math.random()-0.5)*0.5,
+        colorIdx: Math.random() < 0.45 ? 0 : (Math.random() < 0.8 ? 1 : 2)
+      });
+    }
+  }
+  initParticles();
+  window.addEventListener('resize', initParticles);
+
+  const colors = ['rgba(255,59,59,', 'rgba(59,130,255,', 'rgba(255,255,255,'];
+
+  /* تأثير تفاعل مع اللمس/الماوس */
+  let pointer = { x: -1000, y: -1000 };
+  window.addEventListener('mousemove', e=>{ pointer.x = e.clientX; pointer.y = e.clientY; });
+  window.addEventListener('touchmove', e=>{
+    if(e.touches[0]){ pointer.x = e.touches[0].clientX; pointer.y = e.touches[0].clientY; }
+  }, {passive:true});
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const p1 = particles[i], p2 = particles[j];
+        const dist = Math.hypot(p1.x-p2.x, p1.y-p2.y);
+        if(dist < 110){
+          ctx.strokeStyle = `rgba(255,255,255,${0.09 * (1 - dist/110)})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    particles.forEach(p=>{
+      /* تأثير طفو موجي بسيط */
+      p.x += p.dx;
+      p.y += p.dy + Math.sin(Date.now()/2000 + p.x) * 0.05;
+
+      /* ابتعاد خفيف عن نقطة اللمس/الماوس */
+      const dpx = p.x - pointer.x;
+      const dpy = p.y - pointer.y;
+      const pdist = Math.hypot(dpx, dpy);
+      if(pdist < 80){
+        p.x += dpx/pdist * 1.2;
+        p.y += dpy/pdist * 1.2;
+      }
+
+      if(p.x < 0 || p.x > W) p.dx *= -1;
+      if(p.y < 0 || p.y > H) p.dy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = colors[p.colorIdx] + '0.85)';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = colors[p.colorIdx] + '1)';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+
+</body>
+</html>
